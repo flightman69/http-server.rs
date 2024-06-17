@@ -1,4 +1,20 @@
-use std::{io::Write, net::TcpListener};
+use std::io::{Read, Write};
+use std::net::{TcpListener, TcpStream};
+
+fn handle_connection(mut stream: TcpStream) {
+    let mut buffer = [0; 256];
+    stream.read(&mut buffer).unwrap();
+    println!("Request: {}", String::from_utf8_lossy(&buffer[..]));
+
+    let get = b"GET / HTTP/1.1\r\n";
+    let response = if buffer.starts_with(get) {
+        "HTTP/1.1 200 OK\r\n\r\n"
+    } else {
+        "HTTP/1.1 404 Not Found\r\n\r\n"
+    };
+    stream.write(response.as_bytes()).unwrap();
+    stream.flush().unwrap();
+}
 
 fn main() {
     // creating a tcp listener
@@ -6,16 +22,12 @@ fn main() {
 
     for stream in listener.incoming() {
         match stream {
-            Ok(mut stream) => {
+            Ok(_stream) => {
                 println!("accepted new connection");
-
-                match stream.write_all("HTTP/1.1 200 OK\r\n\r\n".as_bytes()) {
-                    Ok(_) => {}
-                    Err(e) => eprintln!("Failed to write stream {e}"),
-                }
+                handle_connection(_stream);
             }
             Err(e) => {
-                println!("error: {}", e);
+                eprintln!("error: {}", e);
             }
         }
     }
