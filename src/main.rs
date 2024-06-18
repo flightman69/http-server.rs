@@ -6,7 +6,6 @@ fn handle_connection(mut stream: TcpStream) {
     stream.read(&mut buffer).unwrap();
     let request = String::from_utf8_lossy(&buffer[..]);
 
-    // let lines: Vec<&str> = request.split("\r\n").collect();
     let tokens: Vec<&str> = request.split(" ").collect();
 
     match tokens[0] {
@@ -38,7 +37,6 @@ fn handle_connection(mut stream: TcpStream) {
         }
     }
 
-    // stream.write(response.as_bytes()).unwrap();
     stream.flush().unwrap();
 }
 
